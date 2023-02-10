@@ -1,4 +1,7 @@
-# ======================================================= #
+#
+# File: Makefile
+# Description: Makefile for running the victim cache testbench.
+#
 
 CORE_FILE = victim_cache.core
 VENDOR	= ucsbece154b
@@ -20,7 +23,6 @@ sim: fusesoc.conf
 	fusesoc run --target tb --tool ${TOOL} ucsbece154b::victim_cache
 
 init: fusesoc.conf
-	pip3 install -r /autograder/source/requirements.txt
 
 lint_1way: fusesoc.conf
 	fusesoc run --target $@ ${PROJECT}
@@ -38,6 +40,7 @@ clean:
 # Files
 
 fusesoc.conf: ${CORE_FILE}
+	pip3 install --user -r requirements.txt
 	rm -f fusesoc.conf
 	fusesoc library add ${VENDOR}_${LIBRARY}_${CORE}_${VERSION} . --sync-type=local
 
