@@ -45,17 +45,10 @@ integer i = 0;
 wire unused = (|i)|(|raddr_i[OFFSET_WIDTH-1:0])|(|waddr_i[OFFSET_WIDTH-1:0]);
 /* verilator lint_on UNUSED */
 
-
-
-
+//////////////////////////////////////////////////
 if (NR_ENTRIES==1) begin : one_register
 // 1-way fully associative cache
 // no LRU needed
-//
-
-
-
-
 struct packed {
     logic [LINE_WIDTH-1:0] data;
     logic [TAG_SIZE-1:0] tag;
@@ -66,7 +59,7 @@ assign hit_o = 0; // TODO
 assign rdata_o = 0; // TODO
 
 always_comb begin
-    MEM_d = MEM_q;
+    MEM_d = MEM_q; //old uptates to new
     if (en_i && we_i) begin
         MEM_d.data = '0; // TODO
         MEM_d.tag = '0; // TODO
@@ -83,14 +76,10 @@ end
 
 
 
-
-//
+//////////////////////////////////////////////////
 end else if (NR_ENTRIES==2) begin : lru_bit
 // 2-way fully associative cache
 // LRU is 1 bit to show which way should be replaced on a write
-//
-
-
 
 // cache memory
 struct packed {
@@ -140,14 +129,11 @@ end
 
 
 
-//
+//////////////////////////////////////////////////
 end else begin : lru_linked_list
 // n-way fully associative cache
 // LRU implemented as linked list
 //
-
-
-
 //                  DLL Structure                   //
 // MRU - ... - way.mru - way - way.lru - ... -  LRU //
 
@@ -215,8 +201,6 @@ always_ff @(posedge clk_i) begin
     lru_q <= lru_d;
     mru_q <= mru_d;
 end
-
-
 
 
 //
