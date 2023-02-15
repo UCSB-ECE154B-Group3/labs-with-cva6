@@ -104,7 +104,7 @@ always_comb begin
         if (en_i && MEM_q[i].valid && (rtag==MEM_q[i].tag)) begin
             hit_o = 1; // TODO-D
             rdata_o = MEM_q[i].data; // TODO-D
-            lru_d = !(1'i); // TODO-D
+            lru_d = !(1'(i)); // TODO-D//
         end
     end
     // handle write port
@@ -152,10 +152,10 @@ way_index_t lru_d, lru_q, mru_d, mru_q;
 
 function void lru_bump(input way_index_t way);
     // function to move way to MRU while maintaining DLL structure
-
-    MEM_d[MEM_d[way].mru].lru = way; // TODO done?
+    //= if the current way is MRU ? its MRU pointer points to itself : update; // Idea given by Ethan
+    MEM_d[MEM_d[way].mru].lru = MEM_d[MEM_d[way].mru].valid ? MEM_d[MEM_d[way].mru].lru : way; // TODO done?
     
-    MEM_d[MEM_d[way].lru].mru = MEM_d[way].mru; // TODO done?
+    MEM_d[MEM_d[way].lru].mru = MEM_d[MEM_d[way].lru].valid ? MEM_d[MEM_d[way].lru].mru : way; // TODO done?
 
     lru_d = lru_d == way ? MEM_d[way].mru : lru_d; // TODO done
     MEM_d[way].lru = mru_d; // TODO done
