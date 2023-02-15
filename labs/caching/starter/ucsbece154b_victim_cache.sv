@@ -31,8 +31,8 @@ module ucsbece154b_victim_cache #(
     input   logic [LINE_WIDTH-1:0]  wdata_i
 );
 
-localparam OFFSET_WIDTH = 1; // TODO (in terms of ADDR_WIDTH and LINE_WIDTH)
-localparam TAG_SIZE = 1; // TODO (in terms of ADDR_WIDTH and LINE_WIDTH)
+localparam OFFSET_WIDTH = $clog2(LINE_WIDTH) - 3; // TODO (in terms of ADDR_WIDTH and LINE_WIDTH)
+localparam TAG_SIZE = ADDR_WIDTH - OFFSET_WIDTH; // TODO (in terms of ADDR_WIDTH and LINE_WIDTH)
 
 logic [TAG_SIZE-1:0] rtag, wtag;
 assign rtag = raddr_i[OFFSET_WIDTH +: TAG_SIZE]; // "indexed part-select" operator
@@ -55,15 +55,15 @@ struct packed {
     logic valid;
 } MEM_d, MEM_q;
 
-assign hit_o = 0; // TODO
-assign rdata_o = 0; // TODO
+assign hit_o = MEM_q.valid && (rtag == MEM_q.tag); // TODO -d
+assign rdata_o = MEM_q.data; // TODO -d
 
 always_comb begin
-    MEM_d = MEM_q; //old uptates to new
+    MEM_d = MEM_q;
     if (en_i && we_i) begin
-        MEM_d.data = '0; // TODO
-        MEM_d.tag = '0; // TODO
-        MEM_d.valid = '0; // TODO
+        MEM_d.data = wdata_i; // TODO -d
+        MEM_d.tag = wtag; // TODO -d
+        MEM_d.valid = '1; // TODO -d
     end
 end
 always_ff @(posedge clk_i) begin
@@ -102,17 +102,17 @@ always_comb begin
     // assign read port
     for (i = 0; i < 2; i++) begin
         if (en_i && MEM_q[i].valid && (rtag==MEM_q[i].tag)) begin
-            hit_o = 0; // TODO
-            rdata_o = 0; // TODO
-            lru_d = 0; // TODO
+            hit_o = 1; // TODO-D
+            rdata_o = MEM_q[i].data; // TODO-D
+            lru_d = !(1'i); // TODO-D
         end
     end
     // handle write port
     if (en_i && we_i) begin
-        MEM_d[lru_d].data = 0; // TODO
-        MEM_d[lru_d].tag = 0; // TODO
-        MEM_d[lru_d].valid = 0; // TODO
-        lru_d = 0; // TODO
+        MEM_d[lru_d].data = wdata_i; // TODO-D
+        MEM_d[lru_d].tag = wtag; // TODO-D
+        MEM_d[lru_d].valid = 1; // TODO-D
+        lru_d = !lru_d; // TODO-D
     end
 end
 always_ff @(posedge clk_i) begin
@@ -152,12 +152,16 @@ way_index_t lru_d, lru_q, mru_d, mru_q;
 
 function void lru_bump(input way_index_t way);
     // function to move way to MRU while maintaining DLL structure
-    MEM_d[MEM_d[way].mru].lru = '0; // TODO
-    MEM_d[MEM_d[way].lru].mru = '0; // TODO
-    lru_d = '0; // TODO
-    MEM_d[way].lru = '0; // TODO
-    MEM_d[mru_d].mru = '0; // TODO
-    mru_d = '0; // TODO
+
+    MEM_d[MEM_d[way].mru].lru = way; // TODO done?
+    
+    MEM_d[MEM_d[way].lru].mru = MEM_d[way].mru; // TODO done?
+
+    lru_d = lru_d == way ? MEM_d[way].mru : lru_d; // TODO done
+    MEM_d[way].lru = mru_d; // TODO done
+    MEM_d[mru_d].mru = way; // TODO done
+    mru_d = way; // TODO done
+
 endfunction
 
 always_comb begin
@@ -172,17 +176,17 @@ always_comb begin
     // assign read port
     for (i = 0; i < NR_ENTRIES; i++) begin
         if (en_i && MEM_d[i].valid && (rtag==MEM_d[i].tag)) begin
-            hit_o = '0; // TODO
-            rdata_o = '0; // TODO
+            hit_o = 1; // TODO
+            rdata_o = MEM_d[i].data; // TODO
             lru_bump(way_index_t'(i));
             break;
         end
     end
     // handle write port
     if (en_i && we_i) begin
-        MEM_d[lru_d].data = '0; // TODO
-        MEM_d[lru_d].tag = '0; // TODO
-        MEM_d[lru_d].valid = '0; // TODO
+        MEM_d[lru_d].data = wdata_i; // TODO -done
+        MEM_d[lru_d].tag = wtag; // TODO -done
+        MEM_d[lru_d].valid = '1; // TODO -done
         lru_bump(lru_d);
     end
     // handle reset/flush/disable
