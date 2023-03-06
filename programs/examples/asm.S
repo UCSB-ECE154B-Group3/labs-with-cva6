@@ -33,7 +33,7 @@ done:
         ecall;
         .data
 
-arr: .asciz "Hello, world!"
+//arr: .asciz "Hello, world!"
 
 
         .section ".tohost","aw",@progbits
