@@ -10,10 +10,10 @@ Read through the [CVA6 Execute Stage Documentation](https://docs.openhwgroup.org
 1. What is the purpose of Out-of-Order?
 2. Give a brief explanation of Scoreboarding and Tomasulo's Algorithm. What are the pros and cons of each? Which OoO strategy does CVA6 use? (Extra: [Tomasulo's original paper](https://ieeexplore.ieee.org/document/5392028))
 3. CVA6's rename unit will not be enabled for this lab. However, provide pseudocode that would run faster assuming the rename unit was enabled.
-4. CVA6 has 7 functional units in [`"ex_stage.sv"`](https://github.com/openhwgroup/cva6/blob/master/core/ex_stage.sv): ALU, Branch Unit, LSU, Multiplier, CSR Buffer, FPU and CVXIF. For each of the 7 functional units, provide:
+4. CVA6 has 7 functional units in [`"ex_stage.sv"`](https://github.com/openhwgroup/cva6/blob/master/core/ex_stage.sv): ALU, Branch Unit, LSU, Multiplier, CSR Buffer, [FPU](https://github.com/openhwgroup/cvfpu), and [CVXIF](https://github.com/openhwgroup/core-v-xif). For each of the 7 functional units, provide:
     1. A brief explanation of its function.
     2. Which instructions it handles.
-    3. How many cycles it takes to execute.
+    3. How many cycles it takes to execute. (You don't have to do this question for the FPU and CVXIF).
 5. Briefly describe when the following hazards can occur:
     1. Read-Write (RAW)
     2. Write-Write (WAW)
@@ -22,7 +22,7 @@ Read through the [CVA6 Execute Stage Documentation](https://docs.openhwgroup.org
 
     [![Scoreboard](./ooo/figures/scoreboard.svg)](https://docs.openhwgroup.org/projects/cva6-user-manual/03_cva6_design/issue_stage.html)
 
-7. Provide a GitHub permalink to the following in CVA6:
+7. After looking through the issue stage and scoreboard RTL, Provide a GitHub permalink to the following in CVA6:
     1. The issue queue instantiation
     2. The logic that specifies if a functional unit is ready to execute a new instruction
     3. The logic that stalls the pipeline due to the execute stage being too full for the next instruction
@@ -39,7 +39,15 @@ Write a program that demonstrates the following situations:
 * A branch miss
 * The issue queue full
 
-First, you will need to enable OoO in CVA6 by increasing the number of commit ports to `4` in the [configuration file](https://github.com/openhwgroup/cva6/blob/ed56df/core/include/cv64a6_imafdc_sv39_config_pkg.sv#L35).
+Note:
+
+* No more than 1 fixed latency unit operation (`ALU`, `CTRL_FLOW`, `CSR`, `MULT`) can be run simultaneously.
+* No more than 1 floating point unit operation (`FPU`, `FPU_VEC`) can be run simultaneously.
+* No more than 1 load-store unit operation (`LOAD`, `STORE`) can be run simultaneously.
+
+To enable out-of-order execution, your program must use a mix of instructions from the 3  functional unit types.
+
+An example of how to run RISC-V floating point instructions (RVF) is provided here: [`"fpu_example.S"`](https://github.com/sifferman/labs-with-cva6/blob/main/programs/rvf/fpu_example.S)
 
 ## Part 1 Questions
 
@@ -68,6 +76,6 @@ You should implement your FIFO with a cyclical buffer. You should have one block
 * If the FIFO is empty, you should never pop.
 * If the FIFO is full, you should only push if you are also popping.
 
-The module you need to finish is [`"ucsbece154b_fifo.sv"`](https://github.com/sifferman/labs-with-cva6/blob/main/labs/ooo/part2/starter/ucsbece154b_fifo.sv), found in [`"labs/ooo/part2/starter"`](https://github.com/sifferman/labs-with-cva6/tree/main/labs/ooo/part2/starter). You can simulate your changes with ModelSim using `make sim TOOL=modelsim` (or Verilator 5 using `make sim TOOL=verilator` assuming that you have it set up). A [sample testbench](https://github.com/sifferman/labs-with-cva6/blob/main/labs/ooo/part2/starter/tb/fifo_tb.sv) is provided that you may edit as desired. You will also be graded on whether your design is synthesizable. You can run `make synth` to verify that it synthesizes with Yosys+Surelog correctly.
+The module you need to finish is [`"ucsbece154b_fifo.sv"`](https://github.com/sifferman/labs-with-cva6/blob/main/labs/ooo/part2/starter/ucsbece154b_fifo.sv), found in [`"labs/ooo/part2/starter"`](https://github.com/sifferman/labs-with-cva6/tree/main/labs/ooo/part2/starter). You can simulate your changes with ModelSim using `make tb TOOL=modelsim` (or Verilator 5 using `make tb TOOL=verilator` assuming that you have it set up). A [sample testbench](https://github.com/sifferman/labs-with-cva6/blob/main/labs/ooo/part2/starter/tb/fifo_tb.sv) is provided that you may edit as desired. You will also be graded on whether your design is synthesizable. You can run `make synth` to verify that it synthesizes with Yosys+Surelog correctly.
 
 Now that you have seen a lot of CVA6's code, **you must mimic the coding practices/styles of CVA6**. This means using `_d` and `_q` nets for all your flip-flops, and using `always_comb` to set your `_d` nets, and using `always_ff` to set your `_q` nets, (though you do not need to create separate `_d` and `_q` nets for your block ram).
