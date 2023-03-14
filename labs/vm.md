@@ -30,7 +30,7 @@ These are the steps it takes in more detail:
 4. **Jump to the OS in S-mode**
 5. Enable virtual memory using the page table
 6. Add the user program to the page table
-7. Load the user program to the page table
+7. Load the user program to user memory
 8. **Jump to the program in U-mode**
 9. [`"rvfi_tracer.sv"`](https://github.com/openhwgroup/cva6/blob/ed56dfd77dd977de747947b99714f88b4c4c1300/corev_apu/tb/rvfi_tracer.sv#L74-L77) hits a breakpoint at `ecall` and exits the simulation
 
@@ -57,8 +57,8 @@ You will need the [RISC-V Privileged Architecture Manual](https://github.com/ris
     5. The size of a PTE
 5. Complete the following page table entry questions.
     1. Provide a diagram of a Sv39 PTE.
-    2. List and define the 9 bottom bits of a Sv39 page table entry.
-    3. In [`"programs/vm/os.S"`](https://github.com/sifferman/labs-with-cva6/blob/main/programs/vm/os.S), each PTE's bottom 9 bits are set to either `0x1`, `0xef`, or `0xff`; explain the purposes of each of these three values.
+    2. List and define the 10 bottom bits of a Sv39 page table entry.
+    3. In [`"programs/vm/os.S"`](https://github.com/sifferman/labs-with-cva6/blob/main/programs/vm/os.S), each PTE's bottom 8 bits are set to either `0x1`, `0xef`, or `0xff`; explain the purposes of each of these three values.
 6. Draw a diagram of the hierarchical page table created in the provided code.
 7. In [`"programs/vm/os.S"`](https://github.com/sifferman/labs-with-cva6/blob/main/programs/vm/os.S) and [`"programs/vm/privilege.S"`](https://github.com/sifferman/labs-with-cva6/blob/main/programs/vm/privilege.S), several control/status registers are written. For each of the registers, provide a screenshot of the bit diagram, and a definition of each of any fields that the provided programs use. (For example, [`"programs/vm/os.S"`](https://github.com/sifferman/labs-with-cva6/blob/main/programs/vm/os.S) only uses the `SUM` from `sstatus`, so `SUM` is the only field you need to give a definition of for `sstatus`).
     1. `mstatus`
@@ -75,7 +75,7 @@ The current simulation runs just one user process, then stops the simulation onc
 
 ### CVA6 Testbench Modification
 
-The CVA6 testbench is currently configured that any `ecall` instruction will stop the simulation. Edit this in [`"rvfi_tracer.sv"`](https://github.com/openhwgroup/cva6/blob/ed56dfd77dd977de747947b99714f88b4c4c1300/corev_apu/tb/rvfi_tracer.sv#L74) so that it only exits the simulation on an `ecall` in M-mode. (Hint: [`"rvfi_pkg.sv"`](https://github.com/openhwgroup/cva6/blob/master/corev_apu/tb/rvfi_pkg.sv), [`"riscv_pkg.sv"`](https://github.com/openhwgroup/cva6/blob/master/core/include/riscv_pkg.sv))
+The CVA6 testbench is currently configured that any `ecall` instruction will stop the simulation. Edit this in [`"rvfi_tracer.sv"`](https://github.com/openhwgroup/cva6/blob/ed56dfd77dd977de747947b99714f88b4c4c1300/corev_apu/tb/rvfi_tracer.sv#L74) so that it only exits the simulation on an `ecall` in M-mode. (Hint: [`"rvfi_pkg.sv"`](https://github.com/openhwgroup/cva6/blob/master/corev_apu/tb/rvfi_pkg.sv), [`"riscv_pkg.sv"`](https://github.com/openhwgroup/cva6/blob/56ecad1aced6eb6083b9fbd216486561cca8b42c/core/include/riscv_pkg.sv#L56))
 
 ### OS Modification
 

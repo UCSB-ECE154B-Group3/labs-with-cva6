@@ -66,16 +66,21 @@ When providing screenshots of waveforms, please include all signals you decide a
 
 In this part, you will implement a synchronous FIFO.
 
-FIFOs (first-in-first-out queues) are incredibly popular in pipelined architecture designs. If two hardware units operate at different rates, the faster unit must stall whenever they communicate. However, a FIFO can be added to buffer the requests so that the faster unit will stall only when the FIFO is full. This strategy usually provides incredible speedup in a design. (CVA6 implements several FIFOs in its design.)
+FIFOs (first-in-first-out queues) are incredibly popular in pipelined architecture designs. Usually, if two hardware units with different clock frequencies/latencies need to communicate, the faster unit must stall and wait for the slower unit to be ready to prevent data loss. Fortunetly, a FIFO can be added between the two units to buffer the requests so that the faster unit will stall only when the FIFO is full, and the slower unit can grab available data as soon as it is ready. This strategy can provide incredible speedup when a lot of different types of hardware units need to communicate. (CVA6 uses several FIFOs in its design.)
 
-You should implement your FIFO with a cyclical buffer. You should have one block ram, with pointers to your FIFO `head` and `tail`. Here are some specifics:
+You should implement your FIFO with a cyclical buffer. You should have one block ram of size `DATA_WIDTH` and `NR_ENTRIES`, with pointers to your FIFO `head` and `tail`. Here are some specifics:
 
 * When you pop an element, you should increment the `head` pointer.
-* When you push an element, you should increment the `tail` pointer.
+* When you push an element, you should write `data_i` to the tail of the buffer, and increment the `tail` pointer.
 * If the `head` or `tail` pointer reach `NR_ENTRIES`, they should reset to `0`.
-* If the FIFO is empty, you should never pop.
-* If the FIFO is full, you should only push if you are also popping.
+* You can push and pop on the same cycle, but if the FIFO is empty, you should only push.
+* If the FIFO is empty, `valid_o` should output `0`, and any pop requests should fail.
+* If the FIFO is full, `full_o` should output `1`, and any push request should fail unless a pop request is also active.
+* As long as the FIFO is not empty, `data_o` should give the data at the head of the buffer.
+* Both pushing and popping should occur on `posedge clk_i`, and reset should occur synchronously.
 
 The module you need to finish is [`"ucsbece154b_fifo.sv"`](https://github.com/sifferman/labs-with-cva6/blob/main/labs/ooo/part2/starter/ucsbece154b_fifo.sv), found in [`"labs/ooo/part2/starter"`](https://github.com/sifferman/labs-with-cva6/tree/main/labs/ooo/part2/starter). You can simulate your changes with ModelSim using `make tb TOOL=modelsim` (or Verilator 5 using `make tb TOOL=verilator` assuming that you have it set up). A [sample testbench](https://github.com/sifferman/labs-with-cva6/blob/main/labs/ooo/part2/starter/tb/fifo_tb.sv) is provided that you may edit as desired. You will also be graded on whether your design is synthesizable. You can run `make synth` to verify that it synthesizes with Yosys+Surelog correctly.
 
-Now that you have seen a lot of CVA6's code, **you must mimic the coding practices/styles of CVA6**. This means using `_d` and `_q` nets for all your flip-flops, and using `always_comb` to set your `_d` nets, and using `always_ff` to set your `_q` nets, (though you do not need to create separate `_d` and `_q` nets for your block ram).
+Now that you have seen a lot of CVA6's code, **you must mimic the coding practices/styles of CVA6**. This means using `_d` and `_q` nets for all your flip-flops, and using `always_comb` to set your `_d` nets, and using `always_ff` to set your `_q` nets.
+
+Note that for your buffer to infer a block ram, you cannot separate it into `_d` and `_q` nets. This is because if your `always_ff` block has `<ARRAY>_q <= <ARRAY>_d;`, your array will be inferred as an array of registers. To be inferred as a block ram, you must do `if (<WE>) <ARRAY>[<ADDR>] <= <DATA>;` instead.
