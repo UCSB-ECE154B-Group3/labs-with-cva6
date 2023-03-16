@@ -47,12 +47,19 @@ Write_Read_hazard:
         div t4, t0, t1;  # t3 = t0 / t4
         lw  t2, 0(t4);   # Load the value at the address t4 into t6
 
+        nop;nop;nop;nop;
 #A_branch_miss:
 Set_up_4:
         li      t5, 5;
+        li      t4, 4;
+        li      t3, 3;
+        li      t2, 2;
 A_branch_miss:
-        beq     t5, zero, MISSING;   #CTRL_FLOW
-        addi    t6, t5, 1;      #ALU
+        bne     t5, zero, MISSING;   #CTRL_FLOW
+        addi    t4, t5, 1;      #ALU
+        addi    t3, t5, 2;      #ALU
+        addi    t2, t5, 3;      #ALU
+        addi    t6, t5, 4;      #ALU
         j       Queue_Full;
 
 MISSING:
