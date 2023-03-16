@@ -1,0 +1,104 @@
+
+./programs/examples/asm.elf:     file format elf64-littleriscv
+
+
+Disassembly of section .text:
+
+0000000080000000 <_start>:
+    80000000:	6299                	lui	t0,0x6
+    80000002:	3002a073          	csrs	mstatus,t0
+    80000006:	098762b7          	lui	t0,0x9876
+    8000000a:	5432829b          	addiw	t0,t0,1347
+    8000000e:	00d29293          	slli	t0,t0,0xd
+    80000012:	43328293          	addi	t0,t0,1075 # 9876433 <_start-0x76789bcd>
+    80000016:	00f29293          	slli	t0,t0,0xf
+    8000001a:	76528293          	addi	t0,t0,1893
+    8000001e:	00092337          	lui	t1,0x92
+    80000022:	a2b3031b          	addiw	t1,t1,-1493
+    80000026:	00d31313          	slli	t1,t1,0xd
+    8000002a:	78930313          	addi	t1,t1,1929 # 92789 <_start-0x7ff6d877>
+    8000002e:	00000397          	auipc	t2,0x0
+    80000032:	0e238393          	addi	t2,t2,226 # 80000110 <WORD_F0>
+    80000036:	0003a007          	flw	ft0,0(t2)
+    8000003a:	00000397          	auipc	t2,0x0
+    8000003e:	0da38393          	addi	t2,t2,218 # 80000114 <WORD_F1>
+    80000042:	0003a087          	flw	ft1,0(t2)
+
+0000000080000046 <Out_of_Order_Execution>:
+    80000046:	0262ce33          	div	t3,t0,t1
+    8000004a:	00107153          	fadd.s	ft2,ft0,ft1
+    8000004e:	00002f03          	lw	t5,0(zero) # 0 <_start-0x80000000>
+
+0000000080000052 <Set_up_1>:
+    80000052:	00000417          	auipc	s0,0x0
+    80000056:	0c640413          	addi	s0,s0,198 # 80000118 <val2>
+
+000000008000005a <Read_Write_hazard>:
+    8000005a:	0283c2b3          	div	t0,t2,s0
+    8000005e:	00042383          	lw	t2,0(s0)
+    80000062:	0001                	nop
+    80000064:	0001                	nop
+    80000066:	0001                	nop
+    80000068:	0001                	nop
+
+000000008000006a <Set_up_2>:
+    8000006a:	00000417          	auipc	s0,0x0
+    8000006e:	0ae40413          	addi	s0,s0,174 # 80000118 <val2>
+    80000072:	098762b7          	lui	t0,0x9876
+    80000076:	5432829b          	addiw	t0,t0,1347
+    8000007a:	00d29293          	slli	t0,t0,0xd
+    8000007e:	43328293          	addi	t0,t0,1075 # 9876433 <_start-0x76789bcd>
+    80000082:	00f29293          	slli	t0,t0,0xf
+    80000086:	76528293          	addi	t0,t0,1893
+
+000000008000008a <Write_Write_hazard>:
+    8000008a:	0282c3b3          	div	t2,t0,s0
+    8000008e:	00042383          	lw	t2,0(s0)
+
+0000000080000092 <Set_up_3>:
+    80000092:	00000e97          	auipc	t4,0x0
+    80000096:	08ae8e93          	addi	t4,t4,138 # 8000011c <val20>
+
+000000008000009a <Write_Read_hazard>:
+    8000009a:	0262ceb3          	div	t4,t0,t1
+    8000009e:	000ea383          	lw	t2,0(t4)
+    800000a2:	0001                	nop
+    800000a4:	0001                	nop
+    800000a6:	0001                	nop
+    800000a8:	0001                	nop
+
+00000000800000aa <Set_up_4>:
+    800000aa:	4f15                	li	t5,5
+    800000ac:	4e91                	li	t4,4
+    800000ae:	4e0d                	li	t3,3
+    800000b0:	4389                	li	t2,2
+
+00000000800000b2 <A_branch_miss>:
+    800000b2:	000f1b63          	bnez	t5,800000c8 <MISSING>
+    800000b6:	001f0e93          	addi	t4,t5,1
+    800000ba:	002f0e13          	addi	t3,t5,2
+    800000be:	003f0393          	addi	t2,t5,3
+    800000c2:	004f0f93          	addi	t6,t5,4
+    800000c6:	a019                	j	800000cc <Queue_Full>
+
+00000000800000c8 <MISSING>:
+    800000c8:	037f0f93          	addi	t6,t5,55
+
+00000000800000cc <Queue_Full>:
+    800000cc:	0262ceb3          	div	t4,t0,t1
+    800000d0:	0262ceb3          	div	t4,t0,t1
+    800000d4:	0262ceb3          	div	t4,t0,t1
+    800000d8:	0262ceb3          	div	t4,t0,t1
+    800000dc:	0262ceb3          	div	t4,t0,t1
+    800000e0:	0262ceb3          	div	t4,t0,t1
+    800000e4:	0262ceb3          	div	t4,t0,t1
+    800000e8:	0262ceb3          	div	t4,t0,t1
+    800000ec:	0262ceb3          	div	t4,t0,t1
+    800000f0:	0262ceb3          	div	t4,t0,t1
+    800000f4:	0262ceb3          	div	t4,t0,t1
+    800000f8:	0262ceb3          	div	t4,t0,t1
+
+00000000800000fc <END>:
+    800000fc:	4501                	li	a0,0
+    800000fe:	05d00893          	li	a7,93
+    80000102:	00000073          	ecall

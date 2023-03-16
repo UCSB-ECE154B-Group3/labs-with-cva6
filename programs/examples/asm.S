@@ -3,8 +3,6 @@
         .globl _start;
 _start: # entry point
 
-# Out-of-Order Execution:
-
         #  enable FPU 
         li      t0, (3 << 13);  #ALU
         csrs    mstatus, t0;    #CSR
@@ -19,6 +17,8 @@ _start: # entry point
         la      t2, WORD_F1;    #ALU
         flw     f1, 0(t2);
 
+# Out-of-Order Execution:
+Out_of_Order_Execution:
         div     t3, t0, t1;     #MULT
         fadd.s  f2, f0, f1;     #FPU #THIS will happen 1st before the div
         lw      t5, 0(zero);    #LSU #THIS will happen 2nd before the div
@@ -28,7 +28,7 @@ Set_up_1:
         la     s0, val2;
 Read_Write_hazard:
         div    t0, t2, s0;  # t0 = t2 / s0
-        lw     t2, 0(s0);   # load t2's value to the address s0
+        lw     t2, 0(s0);   # load s0's value to the address t2
 
         nop;nop;nop;nop;
 
@@ -38,14 +38,14 @@ Set_up_2:
         li     t0, 0x98765432198765;   #ALU
 Write_Write_hazard:
         div    t2, t0, s0;  # t2 = t0 / s0
-        lw     t2, 0(s0);   # store s0's value to the address t2
+        lw     t2, 0(s0);   # load s0's value to the address t2
 
 #Write_Read_hazard:
 Set_up_3:
         la  t4, val20;
 Write_Read_hazard:
-        div t4, t0, t1;  # t3 = t0 / t4
-        lw  t2, 0(t4);   # Load the value at the address t4 into t6
+        div t4, t0, t1;  # t4 = t0 / t1
+        lw  t2, 0(t4);   # load t4's value to the address t2
 
         nop;nop;nop;nop;
 #A_branch_miss:
@@ -55,11 +55,11 @@ Set_up_4:
         li      t3, 3;
         li      t2, 2;
 A_branch_miss:
-        bne     t5, zero, MISSING;   #CTRL_FLOW
-        addi    t4, t5, 1;      #ALU
-        addi    t3, t5, 2;      #ALU
-        addi    t2, t5, 3;      #ALU
-        addi    t6, t5, 4;      #ALU
+        bne     t5, zero, MISSING;   #CTRL_FLOW it will j to MISS
+        addi    t4, t5, 1;      #ALU    # but this two lines will issue since OoO
+        addi    t3, t5, 2;      #ALU    # but this two lines will issue since OoO
+        addi    t2, t5, 3;      #ALU    # and there all got flush since the branch FU
+        addi    t6, t5, 4;      #ALU    # found out it mispredicted
         j       Queue_Full;
 
 MISSING:
