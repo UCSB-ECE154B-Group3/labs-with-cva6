@@ -1,0 +1,156 @@
+
+./programs/vm/modified_os.elf:     file format elf64-littleriscv
+
+
+Disassembly of section .text:
+
+0000000080000000 <_start>:
+    80000000:	000403b7          	lui	t2,0x40
+    80000004:	0013839b          	addiw	t2,t2,1
+    80000008:	00d39393          	slli	t2,t2,0xd
+    8000000c:	01038393          	addi	t2,t2,16 # 40010 <_start-0x7ffbfff0>
+    80000010:	20001e37          	lui	t3,0x20001
+    80000014:	c01e0e1b          	addiw	t3,t3,-1023
+    80000018:	01c3a023          	sw	t3,0(t2)
+    8000001c:	000803b7          	lui	t2,0x80
+    80000020:	0033839b          	addiw	t2,t2,3
+    80000024:	00c39393          	slli	t2,t2,0xc
+    80000028:	20001e37          	lui	t3,0x20001
+    8000002c:	001e0e1b          	addiw	t3,t3,1
+    80000030:	01c3a023          	sw	t3,0(t2) # 80000 <_start-0x7ff80000>
+    80000034:	000203b7          	lui	t2,0x20
+    80000038:	0013839b          	addiw	t2,t2,1
+    8000003c:	00e39393          	slli	t2,t2,0xe
+    80000040:	20000e37          	lui	t3,0x20000
+    80000044:	0efe0e1b          	addiw	t3,t3,239
+    80000048:	01c3a023          	sw	t3,0(t2) # 20000 <_start-0x7ffe0000>
+    8000004c:	000203b7          	lui	t2,0x20
+    80000050:	0013839b          	addiw	t2,t2,1
+    80000054:	00e39393          	slli	t2,t2,0xe
+    80000058:	01038393          	addi	t2,t2,16 # 20010 <_start-0x7ffdfff0>
+    8000005c:	20001e37          	lui	t3,0x20001
+    80000060:	8efe0e1b          	addiw	t3,t3,-1809
+    80000064:	01c3a023          	sw	t3,0(t2)
+    80000068:	000203b7          	lui	t2,0x20
+    8000006c:	0013839b          	addiw	t2,t2,1
+    80000070:	00e39393          	slli	t2,t2,0xe
+    80000074:	01838393          	addi	t2,t2,24 # 20018 <_start-0x7ffdffe8>
+    80000078:	20001e37          	lui	t3,0x20001
+    8000007c:	cefe0e1b          	addiw	t3,t3,-785
+    80000080:	01c3a023          	sw	t3,0(t2)
+    80000084:	000203b7          	lui	t2,0x20
+    80000088:	0013839b          	addiw	t2,t2,1
+    8000008c:	00e39393          	slli	t2,t2,0xe
+    80000090:	02038393          	addi	t2,t2,32 # 20020 <_start-0x7ffdffe0>
+    80000094:	20001e37          	lui	t3,0x20001
+    80000098:	0efe0e1b          	addiw	t3,t3,239
+    8000009c:	01c3a023          	sw	t3,0(t2)
+    800000a0:	40bd                	li	ra,15
+    800000a2:	3a009073          	csrw	pmpcfg0,ra
+    800000a6:	0030009b          	addiw	ra,zero,3
+    800000aa:	01e09093          	slli	ra,ra,0x1e
+    800000ae:	3b009073          	csrw	pmpaddr0,ra
+    800000b2:	00000297          	auipc	t0,0x0
+    800000b6:	03228293          	addi	t0,t0,50 # 800000e4 <m_trap>
+    800000ba:	30529073          	csrw	mtvec,t0
+    800000be:	10000e93          	li	t4,256
+    800000c2:	302ea073          	csrs	medeleg,t4
+    800000c6:	4485                	li	s1,1
+    800000c8:	00001eb7          	lui	t4,0x1
+    800000cc:	820e8e9b          	addiw	t4,t4,-2016
+    800000d0:	300e9073          	csrw	mstatus,t4
+    800000d4:	00000f17          	auipc	t5,0x0
+    800000d8:	034f0f13          	addi	t5,t5,52 # 80000108 <OS>
+    800000dc:	341f1073          	csrw	mepc,t5
+    800000e0:	30200073          	mret
+
+00000000800000e4 <m_trap>:
+    800000e4:	341022f3          	csrr	t0,mepc
+    800000e8:	0291                	addi	t0,t0,4
+    800000ea:	34129073          	csrw	mepc,t0
+    800000ee:	34202373          	csrr	t1,mcause
+    800000f2:	00000073          	ecall
+    800000f6:	0001                	nop
+
+00000000800000f8 <s_trap>:
+    800000f8:	100022f3          	csrr	t0,sstatus
+    800000fc:	14102373          	csrr	t1,sepc
+    80000100:	142023f3          	csrr	t2,scause
+    80000104:	0485                	addi	s1,s1,1
+    80000106:	0001                	nop
+
+0000000080000108 <OS>:
+    80000108:	fff0051b          	addiw	a0,zero,-1
+    8000010c:	02c51513          	slli	a0,a0,0x2c
+    80000110:	00150513          	addi	a0,a0,1
+    80000114:	01351513          	slli	a0,a0,0x13
+    80000118:	00250513          	addi	a0,a0,2
+    8000011c:	18051073          	csrw	satp,a0
+    80000120:	12000073          	sfence.vma
+    80000124:	00000297          	auipc	t0,0x0
+    80000128:	fd428293          	addi	t0,t0,-44 # 800000f8 <s_trap>
+    8000012c:	10529073          	csrw	stvec,t0
+    80000130:	428d                	li	t0,3
+    80000132:	00549563          	bne	s1,t0,8000013c <run_program>
+    80000136:	00000073          	ecall
+    8000013a:	0001                	nop
+
+000000008000013c <run_program>:
+    8000013c:	4289                	li	t0,2
+    8000013e:	04548763          	beq	s1,t0,8000018c <setup_program_2>
+    80000142:	a009                	j	80000144 <setup_program_1>
+
+0000000080000144 <setup_program_1>:
+    80000144:	000203b7          	lui	t2,0x20
+    80000148:	0013839b          	addiw	t2,t2,1
+    8000014c:	00e39393          	slli	t2,t2,0xe
+    80000150:	00838393          	addi	t2,t2,8 # 20008 <_start-0x7ffdfff8>
+    80000154:	20001e37          	lui	t3,0x20001
+    80000158:	4ffe0e1b          	addiw	t3,t3,1279
+    8000015c:	01c3a023          	sw	t3,0(t2)
+    80000160:	00000297          	auipc	t0,0x0
+    80000164:	09428293          	addi	t0,t0,148 # 800001f4 <user_program_1>
+    80000168:	00000317          	auipc	t1,0x0
+    8000016c:	0c030313          	addi	t1,t1,192 # 80000228 <user_program_2>
+    80000170:	00080e37          	lui	t3,0x80
+    80000174:	001e0e1b          	addiw	t3,t3,1
+    80000178:	00ce1e13          	slli	t3,t3,0xc
+    8000017c:	00080f37          	lui	t5,0x80
+    80000180:	001f0f1b          	addiw	t5,t5,1
+    80000184:	00cf1f13          	slli	t5,t5,0xc
+    80000188:	a0a1                	j	800001d0 <setup_program_end>
+    8000018a:	0001                	nop
+
+000000008000018c <setup_program_2>:
+    8000018c:	000203b7          	lui	t2,0x20
+    80000190:	0013839b          	addiw	t2,t2,1
+    80000194:	00e39393          	slli	t2,t2,0xe
+    80000198:	03838393          	addi	t2,t2,56 # 20038 <_start-0x7ffdffc8>
+    8000019c:	20002e37          	lui	t3,0x20002
+    800001a0:	8ffe0e1b          	addiw	t3,t3,-1793
+    800001a4:	01c3a023          	sw	t3,0(t2)
+    800001a8:	00000297          	auipc	t0,0x0
+    800001ac:	08028293          	addi	t0,t0,128 # 80000228 <user_program_2>
+    800001b0:	00000317          	auipc	t1,0x0
+    800001b4:	0a430313          	addi	t1,t1,164 # 80000254 <user_program_end>
+    800001b8:	00080e37          	lui	t3,0x80
+    800001bc:	007e0e1b          	addiw	t3,t3,7
+    800001c0:	00ce1e13          	slli	t3,t3,0xc
+    800001c4:	00080f37          	lui	t5,0x80
+    800001c8:	007f0f1b          	addiw	t5,t5,7
+    800001cc:	00cf1f13          	slli	t5,t5,0xc
+
+00000000800001d0 <setup_program_end>:
+    800001d0:	000403b7          	lui	t2,0x40
+    800001d4:	1003a073          	csrs	sstatus,t2
+    800001d8:	a011                	j	800001dc <copy_code>
+    800001da:	0001                	nop
+
+00000000800001dc <copy_code>:
+    800001dc:	0002ae83          	lw	t4,0(t0)
+    800001e0:	01de2023          	sw	t4,0(t3) # 80000 <_start-0x7ff80000>
+    800001e4:	0291                	addi	t0,t0,4
+    800001e6:	0e11                	addi	t3,t3,4
+    800001e8:	fe62cae3          	blt	t0,t1,800001dc <copy_code>
+    800001ec:	141f1073          	csrw	sepc,t5
+    800001f0:	10200073          	sret
